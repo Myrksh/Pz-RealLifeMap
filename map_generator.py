@@ -145,7 +145,7 @@ def cleanup_cache():
         shutil.rmtree(cache_dir)
         print(f"Cache directory '{cache_dir}' has been removed.")
 
-def generate_map_grid(lat, lon, nb_cells, road_width_scale, margin_factor, status_label):
+def generate_map_grid(lat, lon, rot_ang, nb_cells, road_width_scale, margin_factor, status_label):
     try:
         status_label.config(text="Downloading OSM data... Please wait.", fg="orange")
         print("Step 1: Downloading OSM data...")
@@ -198,6 +198,15 @@ def generate_map_grid(lat, lon, nb_cells, road_width_scale, margin_factor, statu
         center_x = gdf_edges_utm.geometry.centroid.x.mean()
         center_y = gdf_edges_utm.geometry.centroid.y.mean()
         print(f"Map center: ({center_x:.0f}, {center_y:.0f})")
+
+        # Rotation
+        gdf_edges_utm['geometry'] = gdf_edges_utm['geometry'].rotate(
+            rot_ang, origin=(center_x, center_y)
+        )
+        
+        gdf_features_utm['geometry'] = gdf_features_utm['geometry'].rotate(
+            rot_ang, origin=(center_x, center_y)
+        )
 
         total_map_px = cell_px * nb_cells
         meters_per_pixel = total_zone_m / total_map_px
@@ -456,17 +465,20 @@ def add_entry(label_text, default_value, row, tooltip=None):
 
 lat_entry = add_entry("Latitude:", 47.80328791813283, 0, "Latitude of the map center point.")
 lon_entry = add_entry("Longitude:", -3.7209986709586205, 1, "Longitude of the map center point.")
-cells_entry = add_entry("Number of cells (NxN):", 2, 2,
+rot_entry = add_entry("Rotation of the map:", 0.0, 2, 
+                      "Rotation from north (e.g., 90° means east is the north).")
+cells_entry = add_entry("Number of cells (NxN):", 2, 3,
                         "Number of cells per side (e.g., 2 means 4 map tiles).")
-margin_entry = add_entry("Download margin (%):", 0.8, 3,
+margin_entry = add_entry("Download margin (%):", 0.8, 4,
                          "Extra area to download around the map zone.")
-width_entry = add_entry("Road width scale:", 100, 4,
+width_entry = add_entry("Road width scale:", 100, 5,
                         "Scale factor for road widths on the generated maps.")
 
 def on_generate_maps():
     try:
         lat = float(lat_entry.get())
         lon = float(lon_entry.get())
+        rot_ang = float(rot_entry.get())
         n = int(cells_entry.get())
         margin = float(margin_entry.get())
         width_scale = float(width_entry.get())
@@ -474,7 +486,7 @@ def on_generate_maps():
             raise ValueError("Number of cells must be ≥ 1")
         if margin < 0:
             raise ValueError("Margin must be ≥ 0")
-        generate_map_grid(lat, lon, n, width_scale, margin, status_label)
+        generate_map_grid(lat, lon, rot_ang, n, width_scale, margin, status_label)
     except Exception as e:
         showerror("Error", f"Invalid parameter: {e}")
         status_label.config(text="Parameter error.", fg="red")
@@ -482,7 +494,7 @@ def on_generate_maps():
 def on_generate_vegetation():
     generate_vegetation_maps(status_label)
 
-tk.Button(frame, text="Generate Maps + Vegetation", command=on_generate_maps).grid(row=5, column=0, columnspan=2, pady=5)
+tk.Button(frame, text="Generate Maps + Vegetation", command=on_generate_maps).grid(row=6, column=0, columnspan=2, pady=6)
 
 status_label = tk.Label(root, text="", fg="green")
 status_label.pack(pady=5)

@@ -77,7 +77,7 @@ SURFACE_COLOR = {
 
 ROAD_WIDTHS = {
     'default': 8,
-    
+
     'motorway': 20,
     'primary': 15,
     'trunk': 15,
@@ -133,6 +133,7 @@ def get_road_color(highway, surface=None):
 
 def get_road_width_m(highway):
     if isinstance(highway, list): highway = highway[0]
+    return ROAD_WIDTHS.get(highway, ROAD_WIDTHS['default'])
 
 def get_road_priority(highway):
     """Retourne la priorité de dessin d'une route (plus le chiffre est élevé, plus elle est dessinée tard)"""
@@ -357,7 +358,8 @@ def generate_map_grid(lat, lon, rot_ang, nb_cells, road_width_scale, margin_fact
             surface = row.get('surface')
             color = get_road_color(highway, surface)
             width_m = get_road_width_m(highway)
-            lw = max((width_m / meters_per_pixel) * 0.01 * road_width_scale, 0.1)
+            pixel_width = (width_m / meters_per_pixel) * 0.01 * road_width_scale
+            lw = max(pixel_width * (72 / dpi), 0.1) # linewidth in points not pixels
             try:
                 x, y = row.geometry.xy
                 ax.plot(x, y, color=color, linewidth=lw, solid_capstyle='round', zorder=4)

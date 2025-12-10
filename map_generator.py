@@ -37,8 +37,63 @@ VEGETATION_COLORS = {
     'light_long_grass': (0, 255, 0),
 }
 
+ROAD_COLOR = {
+    'default': PALETTE['medium_asphalt'],
 
+    'motorway': PALETTE['dark_asphalt'],
+    'primary': PALETTE['dark_asphalt'],
+    'trunk': PALETTE['dark_asphalt'],
+    'busway': PALETTE['dark_asphalt'],
 
+    'motorway_link': PALETTE['dark_asphalt'],
+    'primary_link': PALETTE['dark_asphalt'],
+    'secondary_link': PALETTE['dark_asphalt'],
+    'tertiary_link': PALETTE['dark_asphalt'],
+
+    'secondary': PALETTE['medium_asphalt'],
+    'tertiary': PALETTE['medium_asphalt'],
+    'residential': PALETTE['medium_asphalt'],
+    'service': PALETTE['medium_asphalt'],
+    'unclassified': PALETTE['medium_asphalt'],
+    'living_street': PALETTE['medium_asphalt'],
+
+    'path': PALETTE['light_asphalt'],
+    'track': PALETTE['dirt'],
+    'bridleway': PALETTE['light_asphalt'],
+    'cycleway': PALETTE['light_asphalt'],
+    'footway': PALETTE['sand'],
+    'steps': PALETTE['light_asphalt'], 
+    'pedestrian': PALETTE['sand'],
+}
+
+SURFACE_COLOR = {
+    'default': PALETTE['dirt'],
+
+    'sand': PALETTE['sand'],
+    'gravel': PALETTE['gravel_dirt'],
+    'dirt': PALETTE['gravel_dirt'],
+    'earth': PALETTE['gravel_dirt'],
+}
+
+ROAD_WIDTHS = {
+    'default': 8,
+    
+    'motorway': 20,
+    'primary': 15,
+    'trunk': 15,
+    'secondary': 10,
+    'tertiary': 8,
+    'residential': 7,
+    'living_street': 7,
+    'service': 7,
+    'unclassified': 7,
+    'path': 2,
+    'track': 2,
+    'bridleway': 2,
+    'pedestrian': 2,
+    'cycleway': 2,
+    'footway': 2,
+}
 
 # ========== UTILS ==========
 def get_natural_color(natural_value):
@@ -71,36 +126,13 @@ def get_landuse_color(landuse_value):
 def get_road_color(highway, surface=None):
     if isinstance(highway, list): highway = highway[0]
     if isinstance(surface, list): surface = surface[0]
-    if highway in ['motorway', 'primary', 'trunk']:
-        return PALETTE['dark_asphalt']
-    elif highway in ['secondary', 'tertiary', 'residential', 'service', 'unclassified']:
-        return PALETTE['medium_asphalt']
-    elif highway in ['path', 'track', 'bridleway', 'cycleway', 'footway']:
-        if surface == 'sand':
-            return PALETTE['sand']
-        elif surface in ['gravel', 'dirt', 'earth']:
-            return PALETTE['gravel_dirt']
-        else:
-            return PALETTE['dirt']
-    return PALETTE['medium_asphalt']
+
+    if surface is not None: return SURFACE_COLOR.get(surface, SURFACE_COLOR['default'])
+    
+    return ROAD_COLOR.get(highway, ROAD_COLOR['default'])
 
 def get_road_width_m(highway):
     if isinstance(highway, list): highway = highway[0]
-    return {
-        'motorway': 20,
-        'primary': 15,
-        'trunk': 15,
-        'secondary': 10,
-        'tertiary': 8,
-        'residential': 7,
-        'service': 7,
-        'unclassified': 7,
-        'path': 2,
-        'track': 2,
-        'bridleway': 2,
-        'cycleway': 2,
-        'footway': 2
-    }.get(highway, 8)
 
 def get_road_priority(highway):
     """Retourne la priorité de dessin d'une route (plus le chiffre est élevé, plus elle est dessinée tard)"""

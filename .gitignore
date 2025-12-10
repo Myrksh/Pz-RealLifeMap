@@ -6,6 +6,7 @@ map_vegetation/
 
 # Cache files
 cache/
+ignore/
 
 # Virtual env
 venv/
